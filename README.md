@@ -80,6 +80,51 @@ status, err := c.PostData()
 // handle response...
 ```
 
+### JSON Parsing with Decoder
+
+The library makes it easy to parse JSON responses directly into Go structs:
+
+```go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+
+    "github.com/coles243/apihelper/client"
+)
+
+type Comments struct {
+    UserId int    `json:"userId"`
+    Id     int    `json:"id"`
+    Title  string `json:"title"`
+    Body   string `json:"body"`
+}
+
+func main() {
+    post := Comments{}
+
+    c := client.ClientServer{
+        URL:            "https://jsonplaceholder.typicode.com/posts/1",
+        TimeoutsClient: 10,
+    }
+    data, _ := c.GetData()
+
+    // Parse JSON response directly into struct
+    json.NewDecoder(bytes.NewReader(data)).Decode(&post)
+
+    fmt.Println(post.Body)
+}
+```
+
+This approach helps with JSON parsing by:
+
+- **Type Safety**: Automatically converts JSON fields to appropriate Go types
+- **Validation**: Ensures the response structure matches your expected format
+- **Performance**: Uses streaming decoder for efficient memory usage with large responses
+- **Simplicity**: Eliminates manual string parsing and type conversion
+
 ## Examples
 
 The `examples/` directory contains working examples:
