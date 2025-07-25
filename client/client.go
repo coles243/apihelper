@@ -77,15 +77,21 @@ func (c *ClientServer) GetData() ([]byte, error) {
 }
 
 // PostRequest
-func (c *ClientServer) PostData() (string, error) {
+func (c *ClientServer) PostData() ([]byte, error) {
 	ctx := context.Background()
-	data := c.Body
 
 	Server := &http.Client{
 		Timeout: time.Duration(c.TimeoutsClient) * time.Second,
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.URL, bytes.NewReader(data))
+	var bodyReader io.Reader
+	if len(c.Body) == 0 {
+		bodyReader = nil
+	} else {
+		bodyReader = bytes.NewReader(c.Body)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.URL, bodyReader)
 
 	if c.AuthToken != "" {
 
@@ -97,24 +103,31 @@ func (c *ClientServer) PostData() (string, error) {
 			req.Header.Set("x-api-key:", c.AuthToken)
 
 		default:
-			return "", errors.New("unable to resolve header type")
+			return nil, errors.New("unable to resolve header type")
 
 		}
 	}
 
 	if err != nil {
 		msg := fmt.Sprintf("Unable to process requests, Error: %v", err)
-		return "", errors.New(msg)
+		return nil, errors.New(msg)
 	}
 
 	resp, err := Server.Do(req)
 
 	if err != nil {
 		msg := fmt.Sprintf("Unable to process requests, Error: %v", err)
-		return "", errors.New(msg)
+		return nil, errors.New(msg)
 	}
 
 	defer resp.Body.Close()
 
-	return resp.Status, nil
+	// Read the response body properly
+	respData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		msg := fmt.Sprintf("unable to read response body: %v", err)
+		return nil, errors.New(msg)
+	}
+
+	return respData, nil
 }
