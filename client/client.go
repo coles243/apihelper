@@ -37,7 +37,7 @@ func (c *ClientServer) GetData() ([]byte, error) {
 			req.Header.Set("Authorization", "Bearer "+c.AuthToken)
 
 		case "x-api-key":
-			req.Header.Set("x-api-key:", c.AuthToken)
+			req.Header.Set("x-api-key", c.AuthToken)
 
 		default:
 			return nil, errors.New("unable to resolve header type")
@@ -105,7 +105,7 @@ func (c *ClientServer) PostData() (string, error) {
 			req.Header.Set("Authorization", "Bearer "+c.AuthToken)
 
 		case "x-api-key":
-			req.Header.Set("x-api-key:", c.AuthToken)
+			req.Header.Set("x-api-key", c.AuthToken)
 
 		default:
 			return "", errors.New("unable to resolve header type")
