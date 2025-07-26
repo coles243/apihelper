@@ -77,7 +77,7 @@ func (c *ClientServer) GetData() ([]byte, error) {
 }
 
 // PostRequest
-func (c *ClientServer) PostData() ([]byte, error) {
+func (c *ClientServer) PostData() (string, error) {
 	ctx := context.Background()
 
 	Server := &http.Client{
@@ -93,6 +93,11 @@ func (c *ClientServer) PostData() ([]byte, error) {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.URL, bodyReader)
 
+	// Set Content-Type for JSON data
+	if len(c.Body) > 0 {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
 	if c.AuthToken != "" {
 
 		switch c.AuthType {
@@ -103,21 +108,21 @@ func (c *ClientServer) PostData() ([]byte, error) {
 			req.Header.Set("x-api-key:", c.AuthToken)
 
 		default:
-			return nil, errors.New("unable to resolve header type")
+			return "", errors.New("unable to resolve header type")
 
 		}
 	}
 
 	if err != nil {
 		msg := fmt.Sprintf("Unable to process requests, Error: %v", err)
-		return nil, errors.New(msg)
+		return "", errors.New(msg)
 	}
 
 	resp, err := Server.Do(req)
 
 	if err != nil {
 		msg := fmt.Sprintf("Unable to process requests, Error: %v", err)
-		return nil, errors.New(msg)
+		return "", errors.New(msg)
 	}
 
 	defer resp.Body.Close()
@@ -126,8 +131,8 @@ func (c *ClientServer) PostData() ([]byte, error) {
 	respData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		msg := fmt.Sprintf("unable to read response body: %v", err)
-		return nil, errors.New(msg)
+		return "", errors.New(msg)
 	}
 
-	return respData, nil
+	return string(respData), nil
 }

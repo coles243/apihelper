@@ -17,7 +17,6 @@ func main() {
 		"body":   "This is a test post",
 		"userId": 1,
 	}
-
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
 		log.Fatalf("Error marshaling JSON: %v", err)
@@ -35,5 +34,5 @@ func main() {
 		log.Fatalf("Error: %v", err)
 	}
 
-	fmt.Printf("Response Status: %s\n", status)
+	fmt.Printf("Response Status: %v\n", string(status))
 }
